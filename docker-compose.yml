@@ -1,0 +1,78 @@
+version: "2"
+
+services:
+  klara-web:
+    build: klara-web
+    command: /entrypoint.sh
+    depends_on:
+      - klara-dispatcher
+      - klara-worker
+    ports:
+      - "9000:9000"
+    networks:
+      klaranet:
+        aliases:
+          - klara-web
+  klara-dispatcher:
+    build: klara-dispatcher
+    mem_limit: 1G
+    command: /entrypoint.sh
+    depends_on:
+      - klara-db
+    networks:
+      klaranet:
+        aliases:
+          - klara-dispatcher
+  klara-worker:
+    build: klara-worker
+    mem_limit: 1G
+    command: /entrypoint.sh
+    depends_on:
+      - klara-dispatcher
+      - klara-db
+    volumes:
+      - ./klara-repo/repository:/var/projects/klara/repository
+    networks:
+      klaranet:
+        aliases:
+          - klara-worker
+  klara-db:
+    restart: always
+    image: mariadb:10
+    mem_limit: 2G
+    environment:
+      - MYSQL_DATABASE=klara
+      - MYSQL_USER=klara
+      - MYSQL_PASSWORD=128200O_o
+      - MYSQL_ROOT_PASSWORD=128200O_o
+    command: /opt/klara/db-patches/create_schema.sh
+    volumes:
+      - ./klara-db/datadir:/var/lib/mysql
+      - ./klara-db/db-patches:/opt/klara/db-patches
+    networks:
+      klaranet:
+        aliases:
+          - klara-db
+
+  nginx:
+    restart: always
+    build: ./nginx
+    command: /entrypoint.sh
+    volumes:
+     - ./nginx/conf:/etc/nginx
+     - /etc/localtime:/etc/localtime:ro
+    ports:
+     - "80:80"
+    networks:
+      - klaranet
+    depends_on:
+      - klara-web
+    environment:
+      - LE_RENEW_HOOK=docker kill -s HUP @CONTAINER_NAME@
+
+
+networks:
+  klaranet:
+    driver: bridge 
+
+
