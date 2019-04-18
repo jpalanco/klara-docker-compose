@@ -1,37 +1,74 @@
-version: "2"
+version: '2'
 
 services:
+  nginx:
+    build:
+      context: nginx/
+      args:
+        KLARA_REV: $KLARA_REV
+    ports:
+        - 80:80
+    command: /entrypoint.sh
+    depends_on:
+      - klara-web
+    volumes:
+        - ./klara-nginx/site.conf:/etc/nginx/conf.d/default.conf
+    environment:
+      - KLARA_REV=$KLARA_REV
+    networks:
+      klaranet:
+        aliases:
+          - klara-nginx
   klara-web:
-    build: klara-web
+    build:
+      context: klara-web/
+      args:
+        - KLARA_REV=$KLARA_REV
+        - MYSQL_DATABASE=$MYSQL_DATABASE
+        - BASE_URL=$BASE_URL
+        - WEB_ENC_KEY=$WEB_ENC_KEY
     command: /entrypoint.sh
     depends_on:
       - klara-dispatcher
-      - klara-worker
     ports:
       - "9000:9000"
+    environment:
+      - KLARA_REV=$KLARA_REV
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
     networks:
       klaranet:
         aliases:
           - klara-web
   klara-dispatcher:
-    build: klara-dispatcher
+    build:
+      context: klara-dispatcher/
+      args:
+        KLARA_REV: $KLARA_REV
     mem_limit: 1G
     command: /entrypoint.sh
     depends_on:
       - klara-db
+    environment:
+      - KLARA_REV=$KLARA_REV
     networks:
       klaranet:
         aliases:
           - klara-dispatcher
   klara-worker:
-    build: klara-worker
+    build:
+      context: klara-worker/
+      args:
+        KLARA_REV: $KLARA_REV
     mem_limit: 1G
     command: /entrypoint.sh
     depends_on:
       - klara-dispatcher
-      - klara-db
     volumes:
-      - ./klara-repo/repository:/var/projects/klara/repository
+      - ./klara-repository/repository:/var/projects/klara/repository
+    environment:
+      - KLARA_REV=$KLARA_REV
     networks:
       klaranet:
         aliases:
@@ -39,40 +76,19 @@ services:
   klara-db:
     restart: always
     image: mariadb:10
-    mem_limit: 2G
+    mem_limit: 1G
     environment:
-      - MYSQL_DATABASE=klara
-      - MYSQL_USER=klara
-      - MYSQL_PASSWORD=128200O_o
-      - MYSQL_ROOT_PASSWORD=128200O_o
-    command: /opt/klara/db-patches/create_schema.sh
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
     volumes:
       - ./klara-db/datadir:/var/lib/mysql
-      - ./klara-db/db-patches:/opt/klara/db-patches
     networks:
       klaranet:
         aliases:
           - klara-db
 
-  nginx:
-    restart: always
-    build: ./nginx
-    command: /entrypoint.sh
-    volumes:
-     - ./nginx/conf:/etc/nginx
-     - /etc/localtime:/etc/localtime:ro
-    ports:
-     - "80:80"
-    networks:
-      - klaranet
-    depends_on:
-      - klara-web
-    environment:
-      - LE_RENEW_HOOK=docker kill -s HUP @CONTAINER_NAME@
-
-
 networks:
   klaranet:
-    driver: bridge 
-
-
+    driver: bridge

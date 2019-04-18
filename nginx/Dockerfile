@@ -1,25 +1,19 @@
-FROM ubuntu:16.04
+FROM nginx:latest
+MAINTAINER jpalanco 
 
-#AVOID_CACHE
-RUN touch /tmp/1486221943
-#AVOID_CACHE_END
+ARG KLARA_REV=4b8130511edb7e4e179dbb5c47d83a6498cefec0
 
-RUN apt-get update \
-	&& apt-get install --no-install-recommends --no-install-suggests -y \
-						ca-certificates \
-						nginx \
-						git\
-	&& rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt-get install -y git
 
-WORKDIR /opt/
+WORKDIR /home/projects/
+RUN git clone https://github.com/KasperskyLab/klara.git ./klara-github-repo
+RUN chown -R www-data:www-data ./klara-github-repo
+WORKDIR ./klara-github-repo
+#RUN git checkout 4b8130511edb7e4e179dbb5c47d83a6498cefec0
+RUN git checkout ${KLARA_REV}
+RUN ln -s /home/projects/klara-github-repo/web /
 
-# forward request and error logs to docker log collector
-RUN ln -sf /dev/stdout /var/log/nginx/access.log \
-	&& ln -sf /dev/stderr /var/log/nginx/error.log
-
-EXPOSE 80 443
-
-COPY entrypoint.sh /
+#Entrypoint
+COPY entrypoint.sh /entrypoint.sh 
 RUN chmod +x /entrypoint.sh
-
-CMD ["nginx", "-g", "daemon off;"]

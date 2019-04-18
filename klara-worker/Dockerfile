@@ -1,5 +1,7 @@
 FROM ubuntu:16.04
-MAINTAINER csandoval
+MAINTAINER jpalanco
+
+ARG KLARA_REV=4b8130511edb7e4e179dbb5c47d83a6498cefec0
 
 # Install the packages needed to run Klara
 RUN apt-get update
@@ -42,6 +44,10 @@ RUN chown -R projects:projects ./.virtualenvs/
 # Clone the repository
 RUN git clone https://github.com/KasperskyLab/klara.git ./klara-github-repo
 RUN chown -R projects:projects ./klara-github-repo
+WORKDIR ./klara-github-repo
+#RUN git checkout 4b8130511edb7e4e179dbb5c47d83a6498cefec0
+RUN git checkout ${KLARA_REV}
+WORKDIR ..
 
 # Install python dependencies
 RUN ./.virtualenvs/klara/bin/pip install -r ./klara-github-repo/install/requirements.txt
