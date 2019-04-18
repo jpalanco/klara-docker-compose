@@ -23,5 +23,5 @@ notification_email_smtp_srv = "127.0.0.1"
 mysql_host      = "klara-db"
 mysql_database  = "klara"
 mysql_user      = "klara"
-mysql_password  = "128200O_o"
+mysql_password  = "changeme"
 
