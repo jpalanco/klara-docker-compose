@@ -1,5 +1,7 @@
 # klara-docker-compose
 
+You can learn more about klara at the original repository https://github.com/KasperskyLab/klara/ or at my blog https://www.jpalanco.com/retrohunt-for-everyone-with-klara/
+
 Modify .env file according to your needs
 
 Run:
