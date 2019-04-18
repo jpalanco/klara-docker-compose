@@ -2,6 +2,13 @@
 
 Modify .env file according to your needs
 
+Run:
+`docker-compose up -d`
+
+Wait a couple of minutes...
+
+Connect to your instance, example: http://localhost/
+
 ## Access
 
 
