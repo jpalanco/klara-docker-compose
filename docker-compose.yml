@@ -12,13 +12,13 @@ services:
     depends_on:
       - klara-web
     volumes:
-        - ./klara-nginx/site.conf:/etc/nginx/conf.d/default.conf
+        - ./nginx/site.conf:/etc/nginx/conf.d/default.conf
     environment:
       - KLARA_REV=$KLARA_REV
     networks:
       klaranet:
         aliases:
-          - klara-nginx
+          - nginx
   klara-web:
     build:
       context: klara-web/
