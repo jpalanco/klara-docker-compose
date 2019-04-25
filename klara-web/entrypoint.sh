@@ -3,7 +3,7 @@
 
 # Once Dispatcher and Web Interfaces are set-up and configured to point to DB, the SQL DB needs to be created
 if [ ! -f /tmp/configured ]; then
-   sleep 15
+   sleep 60
    # FIXME: some commands this should be done in Dockerfile
    cd /home/projects/klara-github-repo
    mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -D$MYSQL_DATABASE -h klara-db < ./install/db_patches/db_schema.sql \
