@@ -30,6 +30,7 @@ services:
     command: /entrypoint.sh
     depends_on:
       - klara-dispatcher
+      - klara-db
     ports:
       - "9000:9000"
     environment:
